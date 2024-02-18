@@ -1,0 +1,32 @@
+Virtual Environment will seperate all the installs from the global machine or any other environment you have. So, 
+no conflick will make
+This library allows us to create a virtual environment:
+    pip install virtualenv
+
+I want to call my environment env. You can call anything that you want. You have to remember this location for future
+when you want to make another env because we installed virtualenv in this location.
+    virtualenv env
+
+We need to activate to start working (If this successfully activated, you can see (env) at the start of every command):
+    for linux/mac: source env/bin/activate
+    for windows: .\env\Scripts\activate
+
+If you need to deactivate, simply type: 
+    deactivate
+
+
+To create every Django Project:
+    To install django. This will install django framework on the virtual environment even if the Django crash course 
+    folder is empty when we created before.
+        pip install django
+
+    Create our django boiler plate to work, 
+        django-admin startproject BengaliBuddy
+
+    then cd BengaliBuddy -> python3 manage.py runserver
+
+
+When working with Django projects, it's a common practice to use a virtual environment to isolate dependencies for 
+each project. The virtual environment is typically created within the project folder, and the env folder (or 
+whatever name you choose) contains the Python interpreter and the installed packages for that specific project.
+So Best Practice: you should give the env folder inside the specific django project everytime.
