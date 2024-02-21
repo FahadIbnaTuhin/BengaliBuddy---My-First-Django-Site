@@ -1,5 +1,9 @@
 <a href="/">
     Home Page
 </a>
-
+<div>
+    <form action="{% url 'home' %}" method="get">
+        <input type="text" name="q" placeholder="Search Rooms..." />
+    </form>
+</div>
 <hr>

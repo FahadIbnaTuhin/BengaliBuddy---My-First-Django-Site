@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
+from django.db.models import Q
 from django.http import HttpResponse
-from .models import Room
+from django.contrib.auth.models import User
+from django.contrib import messages
+from .models import Room, Topic
 from .forms import RoomForm
 
 # rooms = [
@@ -10,10 +13,37 @@ from .forms import RoomForm
 # ]
 
 
+def loginPage(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(username=name)
+        except:
+            messages.error(request, "User doesn't exist. Please Register")
+        
+
+    context = {}
+    return render(request, 'base/login_register.html', context)
+
+
 # Create your views here.
 def home(request):
-    rooms = Room.objects.all()
-    context = {"rooms": rooms}
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    # topic__name__icontains means: it will first go to topic -> name and then 'contains' if the user search by only
+    # py, then he will get the topic that will match. i before contains means whether or not you want the seach option
+    # case insentive or not
+    rooms = Room.objects.filter(
+        Q(topic__name__icontains=q) |
+        Q(name__icontains=q) |
+        Q(description__icontains=q)
+        )
+    
+    # count works faster then python length in django
+    room_count = rooms.count()
+    topics = Topic.objects.all()
+    context = {'rooms': rooms, 'topics': topics, 'room_count': room_count}
     return render(request, "base/home.html", context)
 
 
