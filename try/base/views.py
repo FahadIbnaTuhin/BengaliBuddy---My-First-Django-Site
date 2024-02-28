@@ -2,12 +2,45 @@ from django.shortcuts import render, redirect
 from django.db.models import Q
 from .models import Room
 from .forms import RoomForm
+from django.contrib.auth.models import User
+from django.contrib import messages
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 
 # rooms = [
 #     {"id": 1, "name": "Learn Python with me"}, 
 #     {"id": 2, "name": "Know about js"}, 
 #     {"id": 3, "name": "React Education"}, 
 # ]
+
+
+def loginPage(request):
+    if request.method == "POST":
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(username=username)
+        except:
+            messages.error(request, "The user doesn't exist.")
+
+        user = authenticate(request, username=username, password=password)
+        # Its add a new session in the database and inside of our browser and the user is officially logged in
+        if user is not None:
+            login(request, user)
+            return redirect('home')
+        else:
+            messages.error(request, "Username or Password doesn't exist.")
+
+
+    context = {}
+    return render(request, 'base/login_register.html', context)
+
+
+def logoutUser(request):
+    logout(request)
+    return redirect('home')
+
 
 # Create your views here.
 def home(request):
@@ -43,7 +76,7 @@ def roomForm(request):
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
 
-
+@login_required
 def updateForm(request, pk):
     room = Room.objects.get(id=int(pk))
     form = RoomForm(instance=room)
@@ -56,7 +89,7 @@ def updateForm(request, pk):
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
 
-
+@login_required
 def deleteRoom(request, pk):
     room = Room.objects.get(id=int(pk))
     if request.method == 'POST':
