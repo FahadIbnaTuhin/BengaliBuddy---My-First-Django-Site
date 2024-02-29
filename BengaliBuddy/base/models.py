@@ -20,6 +20,7 @@ class Room(models.Model):
     host = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=200)
+    participants = models.ManyToManyField(User, related_name='participants', blank=True)
     description = models.TextField(null=True, blank=True)
     # blank=True means the form that the users needs to be submit, it can be null, the user can do that later
     # all the users that are currently active in the room

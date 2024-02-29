@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 
 # rooms = [
 #     {"id": 1, "name": "Learn Python with me"}, 
@@ -15,6 +16,10 @@ from django.contrib.auth.decorators import login_required
 
 
 def loginPage(request):
+    page = 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
+
     if request.method == "POST":
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -33,12 +38,18 @@ def loginPage(request):
             messages.error(request, "Username or Password doesn't exist.")
 
 
-    context = {}
+    context = {'page': page}
     return render(request, 'base/login_register.html', context)
 
 
 def logoutUser(request):
     logout(request)
+    return redirect('home')
+
+
+def registerPage(request):
+    page = 'register'
+    context = {}
     return redirect('home')
 
 
@@ -55,6 +66,7 @@ def home(request):
     context = {"rooms": rooms, 'topics': topics, 'room_count': room_count}
     return render(request, "base/home.html", context)
 
+
 def room(request, pk):
     # room = None
     # for i in rooms:
@@ -65,6 +77,7 @@ def room(request, pk):
     return render(request, "base/room.html", context)
 
 
+@login_required
 def roomForm(request):
     form = RoomForm()
     if request.method == "POST":
@@ -76,10 +89,15 @@ def roomForm(request):
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
 
-@login_required
+
+@login_required(login_url='login')
 def updateForm(request, pk):
     room = Room.objects.get(id=int(pk))
     form = RoomForm(instance=room)
+
+    if request.user != room.user:
+        return HttpResponse("You're not allowed here.")
+
     if request.method == "POST":
         form = RoomForm(request.POST, instance=room)
         if form.is_valid():
@@ -89,9 +107,14 @@ def updateForm(request, pk):
     context = {'form': form}
     return render(request, 'base/room_form.html', context)
 
-@login_required
+
+@login_required(login_url='login')
 def deleteRoom(request, pk):
     room = Room.objects.get(id=int(pk))
+
+    if request.user != room.user:
+        return HttpResponse("You're not allowed here.")
+    
     if request.method == 'POST':
         room.delete()
         return redirect('home')
